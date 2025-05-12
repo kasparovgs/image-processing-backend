@@ -1,0 +1,219 @@
+basePath: /
+definitions:
+  domain.Filter:
+    properties:
+      name:
+        type: string
+      parameters:
+        additionalProperties: {}
+        type: object
+    type: object
+  types.GetTaskResultHandlerResponse:
+    properties:
+      result:
+        type: string
+    type: object
+  types.PostRegisterUserHandlerRequest:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  types.PostRegisterUserHandlerResponse:
+    properties:
+      sessionID:
+        type: string
+    type: object
+  types.PostTaskHandlerRequest:
+    properties:
+      filter:
+        $ref: '#/definitions/domain.Filter'
+      image:
+        type: string
+    type: object
+  types.PostTaskHandlerResponse:
+    properties:
+      task_id:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a sample server.
+  title: My API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user with login and password, returns a sessionID
+      parameters:
+      - description: Login and password
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.PostRegisterUserHandlerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.PostRegisterUserHandlerResponse'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Incorrect login or password
+          schema:
+            type: string
+        "404":
+          description: User not found
+          schema:
+            type: string
+      summary: Logs in a user
+      tags:
+      - user
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user and issue their sessionID
+      parameters:
+      - description: login and password
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.PostRegisterUserHandlerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "409":
+          description: User with this username already exist
+          schema:
+            type: string
+      summary: Registers a new user
+      tags:
+      - user
+  /result/{task_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get result of a task by its uuid
+      parameters:
+      - description: UUID of the task
+        in: path
+        name: task_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.GetTaskResultHandlerResponse'
+        "400":
+          description: the task is still in process
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Task not found
+          schema:
+            type: string
+      security:
+      - SessionIDAuth: []
+      summary: Get result of a task
+      tags:
+      - task
+  /status/{task_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get status of a task by its uuid
+      parameters:
+      - description: UUID of the task
+        in: path
+        name: task_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Task not found
+          schema:
+            type: string
+      security:
+      - SessionIDAuth: []
+      summary: Get status of a task
+      tags:
+      - task
+  /task:
+    post:
+      consumes:
+      - application/json
+      description: Submit the task with image upload and returns task_id (uint64)
+      parameters:
+      - description: Image in base64 and filters
+        in: body
+        name: image
+        required: true
+        schema:
+          $ref: '#/definitions/types.PostTaskHandlerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: The task is running successfully
+          schema:
+            $ref: '#/definitions/types.PostTaskHandlerResponse'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - SessionIDAuth: []
+      summary: Submit the task for processing and returns task_id
+      tags:
+      - task
+securityDefinitions:
+  SessionIDAuth:
+    description: Type "Bearer" followed by a space and your token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
