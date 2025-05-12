@@ -1,0 +1,40 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: user_backend/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      broker:
+        condition: service_healthy
+
+  app_test:
+    build:
+      context: ./tests
+      dockerfile: Dockerfile
+    environment:
+      BASE_URL: http://app:8080
+    depends_on:
+      app:
+        condition: service_started
+    profiles: ['test']
+
+  broker:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 10s
+      timeout: 30s
+      retries: 3
+  
+  image_processor:
+    build:
+      context: .
+      dockerfile: image_processor/Dockerfile
+    depends_on:
+      broker:
+        condition: service_healthy
