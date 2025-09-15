@@ -3,4 +3,4 @@ http:
 rabbit_mq:
   host:       "broker"
   port:       5672
-  queue_name: "goida"
+  queue_name: "processors_queue"

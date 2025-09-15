@@ -78,11 +78,6 @@ func (t *Task) PostTask(base64Image string, filter domain.Filter, sessionID stri
 }
 
 func (t *Task) CommitTask(task *domain.Task) error {
-	oldTask, err := t.taskRepo.GetTaskByUUID(task.UUID)
-	if err != nil {
-		return err
-	}
-	oldTask.Base64Image = task.Base64Image
-	oldTask.Status = task.Status
-	return nil
+	err := t.taskRepo.UpdateTask(task)
+	return err
 }
