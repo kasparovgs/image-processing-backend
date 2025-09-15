@@ -4,6 +4,8 @@ WORKDIR /build
 
 COPY image_processor/go.mod image_processor/go.sum ./
 
+COPY pkg/ ../pkg/
+
 COPY user_backend/go.mod ../user_backend/go.mod
 COPY user_backend/domain ../user_backend/domain
 
@@ -19,7 +21,7 @@ FROM alpine AS runner
 
 WORKDIR app
 
-RUN apk add --no-cache curl
+# RUN apk add --no-cache curl
 
 COPY --from=build /build/app ./app
 COPY --from=build /build/cmd/app/config/config.yml ./config.yml

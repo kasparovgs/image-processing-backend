@@ -2,18 +2,23 @@ package main
 
 import (
 	"log"
+	"os"
+	"time"
 	"user_backend/api/http"
-	"user_backend/cmd/app/config"
+	appConfig "user_backend/cmd/app/config"
+	"user_backend/repository/postgres_storage"
 	rabbitMQ "user_backend/repository/rabbit_mq"
-	"user_backend/repository/ram_storage"
+	"user_backend/repository/redis_storage"
 	"user_backend/usecases/service"
 
+	"pkg/config"
 	pkgHttp "pkg/http"
 	_ "user_backend/docs"
 
 	httpSwagger "github.com/swaggo/http-swagger"
 
 	"github.com/go-chi/chi/v5"
+	_ "github.com/lib/pq"
 )
 
 // @title My API
@@ -28,18 +33,35 @@ import (
 // @name Authorization
 // @description Type "Bearer" followed by a space and your token.
 func main() {
-	appFlags := config.ParseFlags()
-	var cfg config.AppConfig
+	appFlags := appConfig.ParseFlags()
+	var cfg appConfig.AppConfig
 	config.MustLoad(appFlags.ConfigPath, &cfg)
 
-	userRepo := ram_storage.NewUserDB()
-	sessionRepo := ram_storage.NewSession()
+	connStr := os.Getenv("DB_CONN_STR")
+	if connStr == "" {
+		log.Fatal("DB_CONN_STR environment variable is required")
+	}
+
+	userRepo, err := postgres_storage.NewUserDB(connStr)
+	if err != nil {
+		log.Fatalf("no connection with postgres: %v", err)
+	}
+
+	ttl, err := time.ParseDuration(cfg.Redis.TTL)
+	if err != nil {
+		log.Fatalf("bad redis.ttl: %v", err)
+	}
+	sessionRepo := redis_storage.NewSession(cfg.Redis.Addr, ttl)
+
 	taskSender, err := rabbitMQ.NewRabbitMQSender(cfg.RabbitMQ)
 	if err != nil {
 		log.Fatalf("failed creating rabbitMQ: %s", err.Error())
 	}
 
-	taskRepo := ram_storage.NewTaskDB()
+	taskRepo, err := postgres_storage.NewTaskDB(connStr)
+	if err != nil {
+		log.Fatalf("no connection with postgres: %v", err)
+	}
 	taskService := service.NewTask(taskRepo, sessionRepo, taskSender)
 	taskHandlers := http.NewTaskHandler(taskService)
 

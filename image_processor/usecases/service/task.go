@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/png"
 	"net/http"
+	"strconv"
 	"user_backend/domain"
 
 	"github.com/disintegration/imaging"
@@ -18,6 +19,7 @@ func ProcessTask(task *domain.Task) error {
 	imgData, err := base64.StdEncoding.DecodeString(base64image)
 	if err != nil {
 		fmt.Println("error decoding base64 image:", err)
+		fmt.Println(base64image)
 		return err
 	}
 
@@ -29,16 +31,28 @@ func ProcessTask(task *domain.Task) error {
 	switch task.Filter.Name {
 	case "Blur":
 		sigmaAny, ok := task.Filter.Parameters["sigma"]
-		if ok {
-			sigma, ok := sigmaAny.(float64)
-			if ok {
-				img = imaging.Blur(img, sigma)
-			} else {
-				return fmt.Errorf("invalid parametrs")
-			}
-		} else {
+		if !ok {
+			fmt.Println("there is no needed parameters")
 			return fmt.Errorf("there is no needed parameters")
 		}
+
+		switch sigmaType := sigmaAny.(type) {
+		case float64:
+			img = imaging.Blur(img, sigmaType)
+
+		case string:
+			sigma, err := strconv.ParseFloat(sigmaType, 64)
+			if err != nil {
+				fmt.Println("invalid parameters:", err)
+				return fmt.Errorf("invalid parameters: %v", err)
+			}
+			img = imaging.Blur(img, sigma)
+
+		default:
+			fmt.Printf("unsupported type for sigma: %T\n", sigmaType)
+			return fmt.Errorf("unsupported type for sigma: %T", sigmaType)
+		}
+
 	default:
 		fmt.Println("Unknown filter: ", task.Filter.Name)
 	}
