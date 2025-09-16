@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'image_processor'
+    static_configs:
+      - targets: ['image_processor:9090']
