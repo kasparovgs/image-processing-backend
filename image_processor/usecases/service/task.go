@@ -7,14 +7,16 @@ import (
 	"fmt"
 	"image"
 	"image/png"
+	"image_processor/metrics"
 	"net/http"
 	"strconv"
+	"time"
 	"user_backend/domain"
 
 	"github.com/disintegration/imaging"
 )
 
-func ProcessTask(task *domain.Task) error {
+func proccessImage(task *domain.Task) error {
 	base64image := task.Base64Image
 	imgData, err := base64.StdEncoding.DecodeString(base64image)
 	if err != nil {
@@ -67,6 +69,19 @@ func ProcessTask(task *domain.Task) error {
 	task.Base64Image = encoded
 	task.Status = domain.Ready
 	return nil
+}
+
+func ProcessTask(task *domain.Task) error {
+	start := time.Now()
+
+	err := proccessImage(task)
+
+	duration := time.Since(start).Seconds()
+	filter := task.Filter.Name
+	metrics.ProcessDuration.WithLabelValues(filter).Observe(duration)
+	metrics.ProcessedImages.WithLabelValues(filter).Inc()
+
+	return err
 }
 
 func CommitTask(task *domain.Task) error {
