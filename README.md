@@ -21,6 +21,8 @@
 - **Swagger** (документация API)
 - **Docker/docker compose** (развёртывание сервиса)
 - **CI** (GitHub actions)
+- **Prometheus** (сбор и хранение метрик)
+- **Grafana** (визуализация метрик)
 
 ## ⚙️ Команды
 
@@ -48,3 +50,5 @@ make launch_with_tests
 | 📜 **Swagger UI** | [http://localhost:8080/swagger/docs/index.html](http://localhost:8080/swagger/docs/index.html) | Просмотр и тестирование API |
 | 📨 **RabbitMQ Management** | [http://localhost:15672/#/](http://localhost:15672/#/) | Логин: `guest`, пароль: `guest` |
 | 🖼 **Base64 converter** | [https://imagestoolkit-develop.netlify.app/base64](https://imagestoolkit-develop.netlify.app/base64) | Быстрая конвертация изображений в base64 и обратно |
+| 📈 **Prometheus** | [http://localhost:9090/query](http://localhost:9090/query) | Сбор метрик |
+| 📊 **Grafana** | [http://localhost:3000/login](http://localhost:3000/login) | Логин: `admin`, пароль: `admin` |
