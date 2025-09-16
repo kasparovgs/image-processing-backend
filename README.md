@@ -8,6 +8,7 @@
 - [Описание](#-описание)
 - [Используемые технологии](#-используемые-технологии)
 - [Запуск](#-запуск)
+- [Полезные ссылки](#-полезные-ссылки)
 
 ## 📖 Описание
 
@@ -15,24 +16,35 @@
 Функциональность - регистрация/авторизация, загрузка и хранение изображений, получение статуса задачи и изменённого изображения.
 
 ## 🛠️ Используемые технологии
-- PostgreSQL (хранение User и Task)
-- Redis (кэширование сессий)
-- Swagger (документация API)
-- Docker и docker compose (развёртывание сервиса)
-- CI (GitHub actions)
+- **PostgreSQL** (хранение User и Task)
+- **Redis** (кэширование сессий)
+- **Swagger** (документация API)
+- **Docker/docker compose** (развёртывание сервиса)
+- **CI** (GitHub actions)
 
-## ⚙️ Запуск
+## ⚙️ Команды
 
+### Запуск
 ```bash
 git clone https://github.com/kasparovgs/image-processing-backend.git
 cd image-processing-backend
 make launch_services
 ```
 
+### Остановка
+```bash
+make stop_services
+```
 
-Посмотреть swagger-документацию можно здесь:
-[http://localhost:8080/swagger/docs/index.html](http://localhost:8080/swagger/docs/index.html)
+### Запуск тестов
+```bash
+make launch_with_tests
+```
 
-RabbitMQ management: [http://localhost:15672/#/](http://localhost:15672/#/) (login: guest, password: guest)
+## 🔗 Полезные ссылки
 
-Рекомендуемый сервис для конвертации изображений в base64 и обратно: [https://imagestoolkit-develop.netlify.app/base64](https://imagestoolkit-develop.netlify.app/base64)
+| Инструмент / сервис | Ссылка | Примечание |
+| --- | --- | --- |
+| 📜 **Swagger UI** | [http://localhost:8080/swagger/docs/index.html](http://localhost:8080/swagger/docs/index.html) | Просмотр и тестирование API |
+| 📨 **RabbitMQ Management** | [http://localhost:15672/#/](http://localhost:15672/#/) | Логин: `guest`, пароль: `guest` |
+| 🖼 **Base64 converter** | [https://imagestoolkit-develop.netlify.app/base64](https://imagestoolkit-develop.netlify.app/base64) | Быстрая конвертация изображений в base64 и обратно |
